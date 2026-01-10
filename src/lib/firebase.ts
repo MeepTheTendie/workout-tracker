@@ -3,12 +3,12 @@ import { getFirestore, collection, addDoc, deleteDoc, doc, enableIndexedDbPersis
 
 // PASTE YOUR FIREBASE CONFIG HERE
 const firebaseConfig = {
-  apiKey: "AIzaSyDhitLQiUqcdSERKIFhieXjpqYGiP5yakw",
-  authDomain: "workouttracker-b501e.firebaseapp.com",
-  projectId: "workouttracker-b501e",
-  storageBucket: "workouttracker-b501e.firebasestorage.app",
-  messagingSenderId: "513881379744",
-  appId: "1:513881379744:web:6b0cb7b419e36c834d4ac5"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
