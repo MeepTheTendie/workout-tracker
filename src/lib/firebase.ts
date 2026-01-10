@@ -1,7 +1,15 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, addDoc, deleteDoc, doc, enableIndexedDbPersistence } from 'firebase/firestore'
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  enableIndexedDbPersistence,
+} from 'firebase/firestore'
 
-// PASTE YOUR FIREBASE CONFIG HERE
+// Use environment variables for security
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -12,8 +20,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig)
+
+// Initialize Services
 export const db = getFirestore(app)
-// Initialize Auth
 export const auth = getAuth(app)
 export const googleProvider = new GoogleAuthProvider()
 
@@ -21,11 +30,15 @@ export const googleProvider = new GoogleAuthProvider()
 export const login = () => signInWithPopup(auth, googleProvider)
 export const logout = () => signOut(auth)
 
-// Try to enable offline persistence (might fail in some browsers/modes, so we catch error)
-enableIndexedDbPersistence(db).catch((err) => console.log('Persistence:', err.code))
+// Enable offline persistence
+enableIndexedDbPersistence(db).catch((err) => {
+  console.warn('Persistence error:', err?.code || err)
+})
 
+// Helper functions for DB
 export const entriesCollection = () => collection(db, 'entries')
 export const templatesCollection = () => collection(db, 'templates')
+
 export const addEntry = (entry: any) => addDoc(entriesCollection(), entry)
 export const addTemplate = (template: any) => addDoc(templatesCollection(), template)
 export const deleteEntry = (id: string) => deleteDoc(doc(db, 'entries', id))
