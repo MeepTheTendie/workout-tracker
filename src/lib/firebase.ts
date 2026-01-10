@@ -10,8 +10,16 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
+
 const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
+// Initialize Auth
+export const auth = getAuth(app)
+export const googleProvider = new GoogleAuthProvider()
+
+// Helper functions for Auth
+export const login = () => signInWithPopup(auth, googleProvider)
+export const logout = () => signOut(auth)
 
 // Try to enable offline persistence (might fail in some browsers/modes, so we catch error)
 enableIndexedDbPersistence(db).catch((err) => console.log('Persistence:', err.code))
