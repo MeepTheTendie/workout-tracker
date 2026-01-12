@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useEntries, useDeleteEntry } from '../lib/queries'
 import { HistoryItem } from '../components/HistoryItem'
 
-export const Route = createFileRoute('/history')({
+export const Route: any = createFileRoute('/history' as any)({
   component: HistoryPage,
 })
 

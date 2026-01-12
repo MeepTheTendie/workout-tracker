@@ -2,7 +2,7 @@ import { Outlet, createFileRoute } from '@tanstack/react-router';
 import { useAuth } from '../lib/auth'; // Assuming this exists
 import { login } from '../lib/firebase';
 
-export const Route = createFileRoute('__root')({
+export const Route: any = createFileRoute('__root' as any)({
   component: RootComponent,
 });
 
