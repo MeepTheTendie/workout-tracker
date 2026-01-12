@@ -114,9 +114,9 @@ export function useExerciseLibrary(entries: Entry[]) {
       })
     }
     if (entry.type === 'workout') {
-  entry.exercises.forEach(ex => {
-    // ... your logic here
-  });
+  entry.exercises.forEach(() => {
+  // ... your logic
+});
 }
   })
   return Array.from(library)

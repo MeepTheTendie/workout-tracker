@@ -7,15 +7,11 @@ export const Route = createFileRoute('/templates')({
 });
 
 function Templates() {
-  const { data: templates, isLoading, error } = useTemplates();
+  const { templates, isLoading } = useTemplates(); // <--- FIXED
   const deleteMutation = useDeleteTemplate();
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">Loading templates...</div>;
-  }
-
-  if (error) {
-    return <div className="p-8 text-center text-red-500">Error loading templates.</div>;
   }
 
   return (
