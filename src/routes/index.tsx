@@ -1,19 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useEntries } from '../lib/queries';
 import { DailyVitals } from '../components/DailyVitals';
-import { Entry } from '../lib/types';
+import type { Entry } from '../lib/types'; // <--- Added "type"
 
 export const Route = createFileRoute('/')({
   component: Index,
 });
 
 function Index() {
-  // Fetch data using your TanStack Query hook
-  const { data: entries, isLoading, error } = useEntries();
+  // FIXED: Destructure correctly based on your existing hook
+  const { entries, isLoading } = useEntries();
 
-  // Sort entries: Newest first
   const sortedEntries =
-    entries?.sort((a, b) => {
+    entries?.sort((a: Entry, b: Entry) => {
       // Prefer createdAt if available, fallback to date
       const timeA = new Date(a.createdAt || a.date).getTime();
       const timeB = new Date(b.createdAt || b.date).getTime();
@@ -22,10 +21,6 @@ function Index() {
 
   if (isLoading) {
     return <div style={{ padding: '20px', color: '#888' }}>Loading your protocol...</div>;
-  }
-
-  if (error) {
-    return <div style={{ padding: '20px', color: 'red' }}>Error loading data.</div>;
   }
 
   return (
@@ -51,7 +46,7 @@ function Index() {
             No activity logged yet.
           </div>
         ) : (
-          sortedEntries.map((entry) => <FeedCard key={entry.id || Math.random()} entry={entry} />)
+          sortedEntries.map((entry: Entry) => <FeedCard key={entry.id || Math.random()} entry={entry} />)
         )}
       </div>
     </div>
@@ -59,7 +54,6 @@ function Index() {
 }
 
 // --- SUB-COMPONENT: FEED CARD ---
-// Renders different content based on entry type
 function FeedCard({ entry }: { entry: Entry }) {
   const cardStyle = {
     padding: '16px',
@@ -133,6 +127,5 @@ function FeedCard({ entry }: { entry: Entry }) {
     );
   }
 
-  // Fallback
   return null;
 }
