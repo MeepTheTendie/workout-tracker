@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Entry } from '../lib/types';
+import type { Entry } from '../lib/types'; // <--- Added "type" here
 
 interface DailyVitalsProps {
   entries: Entry[];
@@ -28,7 +28,13 @@ export function DailyVitals({ entries }: DailyVitalsProps) {
     // Sum up bike minutes
     const bikeMins = todayEntries
       .filter((e) => e.type === 'activity' && e.activityType === 'Cycling')
-      .reduce((sum, e) => sum + (e.type === 'activity' ? (e.duration || 0) : 0), 0);
+      .reduce((sum, e) => {
+         // Safe access with type guard
+         if (e.type === 'activity' && e.duration) {
+             return sum + e.duration;
+         }
+         return sum;
+      }, 0);
 
     return { mSquats, nSquats, bikeMins };
   }, [entries, todayStr]);
@@ -40,7 +46,7 @@ export function DailyVitals({ entries }: DailyVitalsProps) {
     gap: '12px',
     marginBottom: '24px',
     padding: '16px',
-    background: '#1a1a1a', // Dark background
+    background: '#1a1a1a', 
     borderRadius: '12px',
     color: '#fff',
     border: '1px solid #333',
