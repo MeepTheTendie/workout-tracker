@@ -1,169 +1,138 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useForm } from '@tanstack/react-form'
-import { useAddEntry } from '../lib/queries'
-import { useWorkoutTypes } from '../lib/queries'
-import { useEntries } from '../lib/queries'
+import { createFileRoute } from '@tanstack/react-router';
+import { useEntries } from '../lib/queries';
+import { DailyVitals } from '../components/DailyVitals';
+import { Entry } from '../lib/types';
 
 export const Route = createFileRoute('/')({
-  component: QuickLogPage,
-})
+  component: Index,
+});
 
-function QuickLogPage() {
-  const { entries } = useEntries()
-  const workoutTypes = useWorkoutTypes(entries)
-  const addEntry = useAddEntry()
+function Index() {
+  // Fetch data using your TanStack Query hook
+  const { data: entries, isLoading, error } = useEntries();
 
-  const form = useForm({
-    defaultValues: {
-      date: new Date().toISOString().slice(0, 10),
-      loggedBy: 'Me',
-      workoutType: '',
-      exercises: '',
-      duration: '',
-      notes: '',
-    },
-    onSubmit: async ({ value }) => {
-      const rawLines = value.exercises.split('\n').filter((l) => l.trim())
-      const exercises = rawLines.map((line) => {
-        const trimmed = line.trim()
-        const match = trimmed.match(/^(.+?)\s*-\s*(.+)$/)
-        if (match) {
-          return { name: match[1].trim(), details: match[2].trim() }
-        }
-        return { name: trimmed, details: null }
-      })
+  // Sort entries: Newest first
+  const sortedEntries =
+    entries?.sort((a, b) => {
+      // Prefer createdAt if available, fallback to date
+      const timeA = new Date(a.createdAt || a.date).getTime();
+      const timeB = new Date(b.createdAt || b.date).getTime();
+      return timeB - timeA;
+    }) || [];
 
-      await addEntry.mutateAsync({
-        type: 'quick_log',
-        date: value.date,
-        loggedBy: value.loggedBy,
-        workoutType: value.workoutType.trim(),
-        exercises,
-        duration: value.duration ? Number(value.duration) : null,
-        notes: value.notes.trim() || null,
-        createdAt: new Date().toISOString(),
-      })
+  if (isLoading) {
+    return <div style={{ padding: '20px', color: '#888' }}>Loading your protocol...</div>;
+  }
 
-      form.reset()
-      alert('✅ Quick log saved!')
-    },
-  })
+  if (error) {
+    return <div style={{ padding: '20px', color: 'red' }}>Error loading data.</div>;
+  }
 
   return (
-    <section className="card section active">
-      <h2>⚡ Quick Log</h2>
-      <div className="info-box">
-        <strong>Fast entry for workouts on the fly.</strong> Just describe what you did in plain text.
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
+      
+      {/* HEADER */}
+      <header style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0 }}>Gatekeeper</h1>
+        <span style={{ fontSize: '0.9rem', color: '#666' }}>{new Date().toLocaleDateString()}</span>
+      </header>
+
+      {/* VITALS STRIP */}
+      <DailyVitals entries={sortedEntries} />
+
+      {/* ACTIVITY FEED */}
+      <h2 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '16px', marginTop: '32px', color: '#ddd' }}>
+        Recent Logs
+      </h2>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {sortedEntries.length === 0 ? (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#666', border: '1px dashed #333', borderRadius: '8px' }}>
+            No activity logged yet.
+          </div>
+        ) : (
+          sortedEntries.map((entry) => <FeedCard key={entry.id || Math.random()} entry={entry} />)
+        )}
       </div>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          form.handleSubmit()
-        }}
-      >
-        <div className="row2">
-          <form.Field name="date">
-            {(field) => (
-              <div className="form-group">
-                <label htmlFor="quickDate">Date</label>
-                <input
-                  id="quickDate"
-                  type="date"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  required
-                />
-              </div>
-            )}
-          </form.Field>
-          <form.Field name="loggedBy">
-            {(field) => (
-              <div className="form-group">
-                <label htmlFor="quickLoggedBy">Logged by</label>
-                <select
-                  id="quickLoggedBy"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                >
-                  <option value="Me">Me</option>
-                  <option value="Bruce">Bruce</option>
-                  <option value="Natasha">Natasha</option>
-                </select>
-              </div>
-            )}
-          </form.Field>
+    </div>
+  );
+}
+
+// --- SUB-COMPONENT: FEED CARD ---
+// Renders different content based on entry type
+function FeedCard({ entry }: { entry: Entry }) {
+  const cardStyle = {
+    padding: '16px',
+    backgroundColor: '#111',
+    border: '1px solid #333',
+    borderRadius: '8px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '8px',
+  };
+
+  const headerStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: '0.9rem',
+    color: '#888',
+    marginBottom: '4px',
+  };
+
+  // 1. WORKOUTS (Dumbbells / Gym)
+  if (entry.type === 'workout') {
+    return (
+      <div style={cardStyle}>
+        <div style={headerStyle}>
+          <span style={{ color: '#a855f7', fontWeight: 'bold' }}>WORKOUT</span>
+          <span>{entry.date}</span>
         </div>
-        <form.Field name="workoutType">
-          {(field) => (
-            <div className="form-group">
-              <label htmlFor="quickWorkoutType">What did you train?</label>
-              <input
-                id="quickWorkoutType"
-                type="text"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="e.g., Upper Push, Legs, Full Body"
-                list="workout-type-suggestions"
-                required
-              />
-              <datalist id="workout-type-suggestions">
-                {workoutTypes.map((type) => (
-                  <option key={type} value={type} />
-                ))}
-              </datalist>
+        <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{entry.workoutType}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
+          {entry.exercises.map((ex, i) => (
+            <div key={i} style={{ fontSize: '0.9rem', color: '#ccc', display: 'flex', justifyContent: 'space-between' }}>
+              <span>{ex.name}</span>
+              <span style={{ color: '#666' }}>
+                {ex.sets} x {ex.reps}
+              </span>
             </div>
-          )}
-        </form.Field>
-        <form.Field name="exercises">
-          {(field) => (
-            <div className="form-group">
-              <label htmlFor="quickExercises">Exercises (one per line)</label>
-              <textarea
-                id="quickExercises"
-                rows={10}
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="Squats - 3x5..."
-              />
-              <div className="hint">
-                Format: Exercise Name - Sets×Reps @ Weight
-              </div>
-            </div>
-          )}
-        </form.Field>
-        <form.Field name="duration">
-          {(field) => (
-            <div className="form-group">
-              <label htmlFor="quickDuration">Duration (minutes, optional)</label>
-              <input
-                id="quickDuration"
-                type="number"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="60"
-                min="0"
-                max="300"
-              />
-            </div>
-          )}
-        </form.Field>
-        <form.Field name="notes">
-          {(field) => (
-            <div className="form-group">
-              <label htmlFor="quickNotes">Notes</label>
-              <textarea
-                id="quickNotes"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-              />
-            </div>
-          )}
-        </form.Field>
-        <button className="btn" type="submit" disabled={addEntry.isPending}>
-          {addEntry.isPending ? 'Saving...' : 'Save Quick Log'}
-        </button>
-      </form>
-    </section>
-  )
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 2. ACTIVITIES (Bike / Cardio)
+  if (entry.type === 'activity') {
+    return (
+      <div style={cardStyle}>
+        <div style={headerStyle}>
+          <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>ACTIVITY</span>
+          <span>{entry.date}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '1.1rem', fontWeight: 600 }}>{entry.activityType}</span>
+          <span style={{ fontSize: '1.2rem' }}>{entry.duration}m</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. CHECK-INS (Squats)
+  if (entry.type === 'checkin') {
+    return (
+      <div style={{ ...cardStyle, borderColor: '#222', backgroundColor: '#0a0a0a' }}>
+        <div style={headerStyle}>
+          <span style={{ color: '#22c55e', fontWeight: 'bold' }}>CHECK-IN</span>
+          <span>{entry.date}</span>
+        </div>
+        <div>
+          {entry.checkinType} <span style={{ color: '#666' }}>— Completed</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback
+  return null;
 }
