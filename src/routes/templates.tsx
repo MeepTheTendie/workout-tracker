@@ -1,60 +1,75 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useTemplates, useDeleteTemplate } from '../lib/queries'
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useTemplates, useDeleteTemplate } from '../lib/queries';
+import type { WorkoutTemplate, Exercise } from '../lib/types';
 
 export const Route = createFileRoute('/templates')({
-  component: TemplatesPage,
-})
+  component: Templates,
+});
 
-function TemplatesPage() {
-  const { templates, isLoading } = useTemplates()
-  const deleteTemplate = useDeleteTemplate()
+function Templates() {
+  const { data: templates, isLoading, error } = useTemplates();
+  const deleteMutation = useDeleteTemplate();
 
-  if (isLoading) return <div className="muted">Loading templates...</div>
+  if (isLoading) {
+    return <div className="p-8 text-center text-gray-500">Loading templates...</div>;
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-500">Error loading templates.</div>;
+  }
 
   return (
-    <section className="card section active">
-      <h2>📝 Workout Templates</h2>
-      <div className="info-box">
-        Save and reuse your favorite workouts.
+    <div className="max-w-2xl mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-white">Workout Templates</h1>
+        <Link 
+          to="/" 
+          className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+        >
+          Back
+        </Link>
       </div>
 
-      <div className="template-list">
-        {templates.length === 0 ? (
-          <div className="muted">No templates saved yet. Create one from the Full Workout tab!</div>
-        ) : (
-          templates.map((t) => (
-            <div key={t.id} className="template-card">
-              <h3>{t.name}</h3>
-              <div className="template-meta">
-                <span>{t.exercises.length} exercise{t.exercises.length !== 1 ? 's' : ''}</span>
-                <span>•</span>
-                <span>
-                  {t.exercises.slice(0, 3).map((e) => e.name).join(', ')}
-                  {t.exercises.length > 3 ? '...' : ''}
-                </span>
-              </div>
-              <div className="template-actions">
-                <button 
-                  className="btn small success" 
-                  onClick={() => alert("Load manually via 'Load Last Workout' in the Workout tab for now!")}
-                >
-                  Load
-                </button>
+      {(!templates || templates.length === 0) ? (
+        <div className="p-8 border border-dashed border-gray-700 rounded-lg text-center text-gray-500">
+          No templates found. Create one to get started.
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {templates.map((template: WorkoutTemplate) => (
+            <div 
+              key={template.id} 
+              className="bg-gray-900 border border-gray-800 p-4 rounded-lg hover:border-gray-700 transition-colors"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-lg font-semibold text-purple-400">
+                  {template.name}
+                </h3>
                 <button
-                  className="btn small secondary"
                   onClick={() => {
-                    if (confirm('Delete this template?')) {
-                      deleteTemplate.mutate(t.id!)
+                    if (template.id && confirm('Delete this template?')) {
+                      deleteMutation.mutate(template.id);
                     }
                   }}
+                  className="text-gray-600 hover:text-red-500 transition-colors"
+                  title="Delete Template"
                 >
-                  Delete
+                  🗑️
                 </button>
               </div>
+
+              <div className="space-y-1">
+                {template.exercises.map((ex: Exercise, i: number) => (
+                  <div key={i} className="flex justify-between text-sm text-gray-400">
+                    <span>{ex.name}</span>
+                    <span className="text-gray-600">{ex.sets} x {ex.reps}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))
-        )}
-      </div>
-    </section>
-  )
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

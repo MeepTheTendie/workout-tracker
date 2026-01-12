@@ -7,6 +7,14 @@ export interface Exercise {
   notes?: string | null;
 }
 
+export interface WorkoutTemplate {
+  id?: string;
+  name: string;
+  exercises: Exercise[];
+  userId: string;
+  createdAt: string;
+}
+
 export interface WorkoutEntry {
   id?: string;
   type: 'workout';
@@ -36,7 +44,7 @@ export interface CheckinEntry {
   type: 'checkin';
   date: string;
   loggedBy: string;
-  checkinType: string; // <--- This was missing!
+  checkinType: string;
   value: boolean;
   notes?: string | null;
   createdAt: string;

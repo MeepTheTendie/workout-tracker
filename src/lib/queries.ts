@@ -113,11 +113,11 @@ export function useExerciseLibrary(entries: Entry[]) {
         if (ex.name) library.add(ex.name.trim())
       })
     }
-    if (entry.type === 'quick_log' && entry.exercises) {
-      entry.exercises.forEach((ex) => {
-        if (ex.name) library.add(ex.name.trim())
-      })
-    }
+    if (entry.type === 'workout') {
+  entry.exercises.forEach(ex => {
+    // ... your logic here
+  });
+}
   })
   return Array.from(library)
 }
