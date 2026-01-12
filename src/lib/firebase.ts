@@ -54,7 +54,9 @@ export const login = async () => {
 
     window.addEventListener('message', listener)
 
-    const popup = window.open('/api/auth', 'auth', 'width=600,height=700')
+    const authHost = (import.meta.env.VITE_AUTH_HOST as string) || ''
+    const popupUrl = authHost ? `${authHost.replace(/\/$/, '')}/api/auth` : '/api/auth'
+    const popup = window.open(popupUrl, 'auth', 'width=600,height=700')
     if (!popup) {
       cleanup()
       // fallback
