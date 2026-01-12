@@ -10,6 +10,15 @@ export const Route: any = createFileRoute('__root' as any)({
 function RootComponent() {
   const { user, loading } = useAuth();
 
+  const handleSignIn = useCallback(async () => {
+    try {
+      await login()
+    } catch (err: any) {
+      console.error('Auth error', err)
+      alert(err?.code ? `${err.code}: ${err.message}` : String(err))
+    }
+  }, [])
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-950">
@@ -19,16 +28,6 @@ function RootComponent() {
   }
 
   if (!user) {
-    const handleSignIn = useCallback(async () => {
-      try {
-        await login()
-      } catch (err: any) {
-        console.error('Auth error', err)
-        // surface the Firebase error code/message to make debugging easier in prod
-        alert(err?.code ? `${err.code}: ${err.message}` : String(err))
-      }
-    }, [])
-
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950 p-4 text-center">
         <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 mb-2">
