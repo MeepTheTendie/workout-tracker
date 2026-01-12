@@ -1,6 +1,7 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router';
 import { useAuth } from '../lib/auth'; // Assuming this exists
 import { login } from '../lib/firebase';
+import { useCallback } from 'react'
 
 export const Route: any = createFileRoute('__root' as any)({
   component: RootComponent,
@@ -18,18 +19,30 @@ function RootComponent() {
   }
 
   if (!user) {
+    const handleSignIn = useCallback(async () => {
+      try {
+        await login()
+      } catch (err: any) {
+        console.error('Auth error', err)
+        // surface the Firebase error code/message to make debugging easier in prod
+        alert(err?.code ? `${err.code}: ${err.message}` : String(err))
+      }
+    }, [])
+
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950 p-4 text-center">
         <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 mb-2">
           GATEKEEPER
         </h1>
         <p className="text-zinc-500 mb-8 max-w-xs">Log the work. Track the progress. Own the day.</p>
-        <button
-          onClick={login}
-          className="px-8 py-3 bg-emerald-500 text-black font-bold rounded-full hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20"
-        >
-          Sign In with Google
-        </button>
+        <div className="w-full flex justify-center">
+          <button
+            onClick={handleSignIn}
+            className="mx-auto px-8 py-3 bg-emerald-500 text-black font-bold rounded-full hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20"
+          >
+            Sign In with Google
+          </button>
+        </div>
       </div>
     );
   }
