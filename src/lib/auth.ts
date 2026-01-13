@@ -1,13 +1,15 @@
-// Simplified auth hook for environments where auth is intentionally removed.
-// Returns a stable local user so UI behaves as authenticated.
+// src/lib/auth.ts
+import { useState, useEffect } from 'react';
+
 export function useAuth() {
-  const user = {
-    uid: 'local',
-    displayName: 'Local',
-    photoURL: undefined,
-  } as any
-
-  const loading = false
-
-  return { user, loading }
+  // Always return a dummy user so the app never blocks you
+  return {
+    user: {
+      uid: 'dev-user-id',
+      displayName: 'Developer',
+      photoURL: null, // or put a placeholder image URL here
+      email: 'dev@gatekeeper.local'
+    },
+    loading: false // Never stuck loading
+  };
 }
