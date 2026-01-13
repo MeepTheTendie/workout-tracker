@@ -6,7 +6,7 @@ import { useExerciseLibrary, useWorkoutTypes, useEntries } from '../lib/queries'
 import { ExerciseCard } from '../components/ExerciseCard'
 import type { Exercise } from '../lib/types'
 
-export const Route: any = createFileRoute('/workout' as any)({
+export const Route = createFileRoute('/workout')({
   component: WorkoutPage,
 })
 

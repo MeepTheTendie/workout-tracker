@@ -3,7 +3,7 @@ import { useAuth } from '../lib/auth'; // Assuming this exists
 import { login } from '../lib/firebase';
 import { useCallback } from 'react'
 
-export const Route: any = createFileRoute('__root' as any)({
+export const Route = createFileRoute('__root')({
   component: RootComponent,
 });
 

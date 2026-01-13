@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useTemplates, useDeleteTemplate } from '../lib/queries';
 import type { WorkoutTemplate, Exercise } from '../lib/types';
 
-export const Route: any = createFileRoute('/templates' as any)({
+export const Route = createFileRoute('/templates')({
   component: Templates,
 });
 

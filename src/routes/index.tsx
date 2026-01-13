@@ -4,7 +4,7 @@ import { DailyVitals } from '../components/DailyVitals';
 import { HistoryItem } from '../components/HistoryItem'; // Use the component we made!
 import type { Entry } from '../lib/types';
 
-export const Route: any = createFileRoute('/' as any)({
+export const Route = createFileRoute('/')({
   component: Index,
 });
 

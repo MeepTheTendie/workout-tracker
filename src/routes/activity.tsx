@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { useAddEntry } from '../lib/queries'
 
-export const Route: any = createFileRoute('/activity' as any)({
+export const Route = createFileRoute('/activity')({
   component: ActivityPage,
 })
 
