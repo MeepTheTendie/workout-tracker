@@ -1,19 +1,13 @@
-import { useState, useEffect } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
-import type { User } from 'firebase/auth'
-import { auth } from './firebase'
-
+// Simplified auth hook for environments where auth is intentionally removed.
+// Returns a stable local user so UI behaves as authenticated.
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const user = {
+    uid: 'local',
+    displayName: 'Local',
+    photoURL: undefined,
+  } as any
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser)
-      setLoading(false)
-    })
-    return () => unsubscribe()
-  }, [])
+  const loading = false
 
   return { user, loading }
 }

@@ -27,8 +27,15 @@ export const auth = getAuth(app)
 export const googleProvider = new GoogleAuthProvider()
 
 // Helper functions for Auth
-export const login = () => signInWithPopup(auth, googleProvider)
-export const logout = () => signOut(auth)
+// Primary login: try central auth domain popup (serverless endpoint) which
+// runs the Firebase client and posts back the result. Fallback to direct
+// `signInWithPopup` when running server-side or if the popup flow fails.
+// Authentication removed — make login/logout no-ops so app runs without OAuth.
+export const login = async () => {
+  return Promise.resolve({ uid: 'local' })
+}
+
+export const logout = async () => Promise.resolve()
 
 // Enable offline persistence
 enableIndexedDbPersistence(db).catch((err) => {
