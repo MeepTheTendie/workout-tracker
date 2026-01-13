@@ -3,8 +3,10 @@
 // This is intended as a short-term safety net — prefer generating
 // `routeTree.gen.ts` or a more specific declaration long-term.
 
-declare interface FileRoutesByPath {
-  [path: string]: any
+declare global {
+  interface FileRoutesByPath {
+    [path: string]: any
+  }
 }
 
 export {}
