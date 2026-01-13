@@ -30,50 +30,12 @@ export const googleProvider = new GoogleAuthProvider()
 // Primary login: try central auth domain popup (serverless endpoint) which
 // runs the Firebase client and posts back the result. Fallback to direct
 // `signInWithPopup` when running server-side or if the popup flow fails.
+// Authentication removed — make login/logout no-ops so app runs without OAuth.
 export const login = async () => {
-  if (typeof window === 'undefined') return signInWithPopup(auth, googleProvider)
-
-  return new Promise<any>((resolve, reject) => {
-    let settled = false
-    const cleanup = () => {
-      window.removeEventListener('message', listener)
-      clearTimeout(timeout)
-    }
-
-    const listener = (e: MessageEvent) => {
-      if (!e.data || e.data.type !== 'auth-result') return
-      if (settled) return
-      settled = true
-      cleanup()
-      if (e.data.error) {
-        reject(new Error(e.data.error.message || e.data.error.code || 'Auth error'))
-      } else {
-        resolve(e.data.user)
-      }
-    }
-
-    window.addEventListener('message', listener)
-
-    const authHost = (import.meta.env.VITE_AUTH_HOST as string) || ''
-    const popupUrl = authHost ? `${authHost.replace(/\/$/, '')}/api/auth` : '/api/auth'
-    const popup = window.open(popupUrl, 'auth', 'width=600,height=700')
-    if (!popup) {
-      cleanup()
-      // fallback
-      signInWithPopup(auth, googleProvider).then(resolve).catch(reject)
-      return
-    }
-
-    const timeout = setTimeout(() => {
-      if (settled) return
-      settled = true
-      cleanup()
-      reject(new Error('Auth timed out'))
-    }, 60_000)
-  })
+  return Promise.resolve({ uid: 'local' })
 }
 
-export const logout = () => signOut(auth)
+export const logout = async () => Promise.resolve()
 
 // Enable offline persistence
 enableIndexedDbPersistence(db).catch((err) => {
