@@ -4,6 +4,7 @@
  */
 
 requireCsrf();
+if (!checkRateLimit('login', 10, 900)) { http_response_code(429); header('Retry-After: 900'); exit('Too many login attempts. Please try again later.'); }
 
 $password = stringParam($_POST['password'] ?? '');
 

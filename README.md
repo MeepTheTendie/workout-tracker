@@ -1,3 +1,5 @@
+> Deployment status: this app was retired in favor of Toku Tracker. These maintenance changes do not reactivate the old site.
+
 # Workout Tracker
 
 A clean PHP workout tracking application with routines, cardio, stats, and body composition tracking.
@@ -184,3 +186,9 @@ php -S localhost:8080
 ## License
 
 MIT
+
+## Maintenance improvements
+
+Goals now support creation, editing, manual progress updates and deletion, with ownership and CSRF checks. Login attempts are limited across sessions by client IP; successful login rotates the session ID, and sessions expire and are invalidated by a changed configured password hash. `storage/rate-limits` must be writable by PHP and inaccessible from the web (covered by `.htaccess`); `RATE_LIMIT_DIR` can point to another private directory. These changes do not modify the database schema.
+
+Run `python3 tests/http_regression.py` in addition to PHPUnit. It creates a disposable copy and SQLite database and checks the actual goal routes and login behavior. Existing PHPUnit tests also pass; an existing PHP deprecation remains.

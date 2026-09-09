@@ -73,6 +73,9 @@ $routes = [
     // Goals
     'goals' => ['method' => 'GET', 'auth' => true, 'file' => 'pages/goals.php'],
     
+    'action/goals/save' => ['method'=>'POST', 'auth'=>true, 'file'=>'actions/goals/save.php'],
+    'action/goals/delete' => ['method'=>'POST', 'auth'=>true, 'file'=>'actions/goals/delete.php'],
+
     // PRs
     'prs' => ['method' => 'GET', 'auth' => true, 'file' => 'pages/prs.php'],
     

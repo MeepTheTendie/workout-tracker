@@ -8,7 +8,9 @@
  */
 function isLoggedIn(): bool
 {
-    return isset($_SESSION['user_id']) && $_SESSION['user_id'] > 0;
+    return isset($_SESSION['user_id'], $_SESSION['authenticated_at'], $_SESSION['auth_fingerprint']) && $_SESSION['user_id'] > 0
+        && time() - $_SESSION['authenticated_at'] < (int)($_ENV['SESSION_LIFETIME'] ?? 3600)
+        && hash_equals(hash('sha256', $_ENV['ADMIN_PASSWORD_HASH'] ?? ''), $_SESSION['auth_fingerprint']);
 }
 
 /**
@@ -74,6 +76,10 @@ function attemptLogin(string $password): bool
             $userId = $user['id'];
         }
         
+        session_regenerate_id(true);
+        unset($_SESSION['csrf_token']);
+        $_SESSION['authenticated_at'] = time();
+        $_SESSION['auth_fingerprint'] = hash('sha256', $hash);
         $_SESSION['user_id'] = $userId;
         $_SESSION['created'] = time();
         

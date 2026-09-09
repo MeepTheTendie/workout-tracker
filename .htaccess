@@ -2,6 +2,9 @@
 
 # Enable rewrite engine
 RewriteEngine On
+RewriteRule ^(?:storage|vendor|tests|includes|actions|pages)(?:/|$) - [F,L]
+RewriteRule \.(?:db|sqlite|sqlite3|bak|lock|json|xml)$ - [F,L]
+
 
 # Redirect all requests to index.php (except actual files)
 RewriteCond %{REQUEST_FILENAME} !-f

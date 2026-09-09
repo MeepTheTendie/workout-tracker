@@ -30,7 +30,7 @@ function csrfField(): string
 function validateCsrf(): bool
 {
     $token = $_POST['csrf_token'] ?? '';
-    return !empty($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+    return is_string($token) && !empty($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
 /**
@@ -117,28 +117,20 @@ function getFlash(): ?array
  */
 function checkRateLimit(string $key, int $maxAttempts = 60, int $windowSeconds = 60): bool
 {
-    $now = time();
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rateKey = "rate_limit_{$key}_{$ip}";
-    
-    if (!isset($_SESSION[$rateKey])) {
-        $_SESSION[$rateKey] = ['count' => 1, 'start' => $now];
-        return true;
-    }
-    
-    $data = $_SESSION[$rateKey];
-    
-    // Reset if window expired
-    if ($now - $data['start'] > $windowSeconds) {
-        $_SESSION[$rateKey] = ['count' => 1, 'start' => $now];
-        return true;
-    }
-    
-    // Check limit
-    if ($data['count'] >= $maxAttempts) {
-        return false;
-    }
-    
-    $_SESSION[$rateKey]['count']++;
-    return true;
+    $directory = $_ENV['RATE_LIMIT_DIR'] ?? __DIR__ . '/../storage/rate-limits';
+    if (!is_dir($directory) && !mkdir($directory, 0700, true) && !is_dir($directory)) return false;
+    $file = $directory . '/' . hash('sha256', $key . ':' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown')) . '.json';
+    $handle = fopen($file, 'c+');
+    if (!$handle) return false;
+    try {
+        if (!flock($handle, LOCK_EX)) return false;
+        $data = json_decode(stream_get_contents($handle), true);
+        $now = time();
+        if (!is_array($data) || $now - ($data['start'] ?? 0) >= $windowSeconds) $data = ['start'=>$now, 'count'=>0];
+        if ($data['count'] >= $maxAttempts) return false;
+        $data['count']++;
+        rewind($handle); ftruncate($handle, 0);
+        $encoded = json_encode($data);
+        return fwrite($handle, $encoded) === strlen($encoded) && fflush($handle);
+    } finally { flock($handle, LOCK_UN); fclose($handle); }
 }
