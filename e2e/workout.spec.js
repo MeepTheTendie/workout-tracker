@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 const TEST_EMAIL = 'wesleympennock@gmail.com';
-const TEST_PASSWORD = 'REDACTED_CREDENTIAL';
+const TEST_PASSWORD = process.env.TEST_PASSWORD || '';
 
 test.describe('Workout Flow', () => {
   test.beforeEach(async ({ page }) => {

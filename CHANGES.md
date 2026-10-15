@@ -100,8 +100,7 @@ Most actions already check ownership in their SQL queries (e.g., `WHERE user_id 
 
 ## Login Credentials
 
-**Email:** `wesleympennock@gmail.com`
-**Password:** `REDACTED_CREDENTIAL`
+Stored in the environment / database only — never commit real values.
 
 ## Testing Commands
 

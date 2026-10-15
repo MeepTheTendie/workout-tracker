@@ -16,9 +16,8 @@
   - `actions/auth/login.php` (568 bytes) - Uses validation layer
   - `pages/login.php` (1,262 bytes) - Added email field
 
-**Credentials:**
-- Email: `wesleympennock@gmail.com`
-- Password: `REDACTED_CREDENTIAL`
+**Credentials:** stored in the environment / database only — never committed.
+Any credential that was ever committed to this repository has been rotated.
 
 ### 2. Password Change Feature (COMPLETE)
 - **New Pages:**
